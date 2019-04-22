@@ -100,18 +100,12 @@ if __name__ == '__main__':
     model.load_weights(args.weightsfile)
     print("Network successfully loaded")
     
-    model.net_info["height"] = args.reso
-    global inp_dim 
-    inp_dim = int(model.net_info["height"])
-    assert inp_dim % 32 == 0 
-    assert inp_dim > 32
+    
 
     if CUDA:
         model.cuda()
         
-    model(get_test_input(inp_dim, CUDA), CUDA)
-
-    model.eval()
+   
     
     videofile = args.video
     
@@ -134,6 +128,15 @@ if __name__ == '__main__':
             elif key & 0xFF == ord('r'):
                 inp_dim = 608
             '''
+            #model(get_test_input(inp_dim, CUDA), CUDA)
+            model.net_info["height"] = args.reso
+            #global inp_dim 
+            inp_dim = int(model.net_info["height"])
+            print(inp_dim)
+            assert inp_dim % 32 == 0 
+            assert inp_dim > 32
+
+            model.eval()
             img, orig_im, dim = prep_image(frame, inp_dim)
             
             im_dim = torch.FloatTensor(dim).repeat(1,2)                        
@@ -160,7 +163,7 @@ if __name__ == '__main__':
 
             
             im_dim = im_dim.repeat(output.size(0), 1)
-            scaling_factor = torch.min(int(args.reso)/im_dim,1)[0].view(-1,1)
+            scaling_factor = torch.min(inp_dim/im_dim,1)[0].view(-1,1)
             
             output[:,[1,3]] -= (inp_dim - scaling_factor*im_dim[:,0].view(-1,1))/2
             output[:,[2,4]] -= (inp_dim - scaling_factor*im_dim[:,1].view(-1,1))/2
@@ -186,13 +189,13 @@ if __name__ == '__main__':
                 break
             elif key & 0xFF == ord('w'):
                 args.reso = 320
-                inp_dim = 320
+                #inp_dim = 320
             elif key & 0xFF == ord('e'):
                 args.reso = 416
-                inp_dim = 416
+                #inp_dim = 416
             elif key & 0xFF == ord('r'):
                 args.reso = 608
-                inp_dim = 608
+                #inp_dim = 608
        
         else:
             break
